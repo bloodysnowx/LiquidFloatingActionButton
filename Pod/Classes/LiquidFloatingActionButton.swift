@@ -110,7 +110,6 @@ public class LiquidFloatingActionButton : UIView {
     }
 
     private func insertCell(cell: LiquidFloatingCell) {
-        cell.color  = self.color
         cell.radius = self.frame.width * cellRadiusRatio
         cell.center = self.center.minus(self.frame.origin)
         cell.actionButton = self
@@ -132,7 +131,7 @@ public class LiquidFloatingActionButton : UIView {
         }
 
         let cells = cellArray()
-        cells.forEach(insertCell)
+        cells.forEach { insertCell($0) }
 
         self.baseView.open(cells)
         self.delegate?.liquidFloatingActionButtonOpened?(self)
@@ -492,6 +491,14 @@ public class LiquidFloatingCell : LiquittableCircle {
         self.originalColor = UIColor.clearColor()
         super.init()
         setup(icon)
+    }
+    
+    public init(icon: UIImage, tintColor: UIColor, backgroundColor: UIColor) {
+        self.originalColor = backgroundColor
+        super.init()
+        self.color = backgroundColor
+        self.tintColor = tintColor
+        setup(icon, tintColor: tintColor)
     }
 
     required public init?(coder aDecoder: NSCoder) {
