@@ -18,6 +18,8 @@ import QuartzCore
 @objc public protocol LiquidFloatingActionButtonDelegate {
     // selected method
     optional func liquidFloatingActionButton(liquidFloatingActionButton: LiquidFloatingActionButton, didSelectItemAtIndex index: Int)
+    optional func liquidFloatingActionButtonOpened(liquidFloatingActionButton: LiquidFloatingActionButton)
+    optional func liquidFloatingActionButtonClosed(liquidFloatingActionButton: LiquidFloatingActionButton)
 }
 
 public enum LiquidFloatingActionButtonAnimateStyle : Int {
@@ -60,14 +62,32 @@ public class LiquidFloatingActionButton : UIView {
         }
     }
     
-    @IBInspectable public var image: UIImage? {
-        didSet {
-            if image != nil {
-                plusLayer.contents = image!.CGImage
-                plusLayer.path = nil
-            }
-        }
+    private var imageLayerRect: CGRect {
+        return CGRect(x: circleLayer.bounds.minX + circleLayer.bounds.width * 0.1,
+                      y: circleLayer.bounds.minY + circleLayer.bounds.height * 0.1,
+                      width: circleLayer.bounds.width * 0.8,
+                      height: circleLayer.bounds.width * 0.8)
     }
+    
+    private func updatePlusLayerFrame() {
+        plusLayer.frame = (image != nil || openedImage != nil) ? imageLayerRect : circleLayer.bounds
+    }
+    
+    @IBInspectable public var image: UIImage? { didSet {
+        if let image = image where isClosed {
+            plusLayer.contents = image.CGImage
+            plusLayer.path = nil
+        }
+        updatePlusLayerFrame()
+    }}
+    
+    @IBInspectable public var openedImage: UIImage? { didSet {
+        if let openedImage = openedImage where isOpening {
+            plusLayer.contents = openedImage.CGImage
+            plusLayer.path = nil
+        }
+        updatePlusLayerFrame()
+    }}
     
     @IBInspectable public var rotationDegrees: CGFloat = 45.0
 
@@ -98,41 +118,39 @@ public class LiquidFloatingActionButton : UIView {
     }
     
     private func cellArray() -> [LiquidFloatingCell] {
-        var result: [LiquidFloatingCell] = []
-        if let source = dataSource {
-            for i in 0..<source.numberOfCells(self) {
-                result.append(source.cellForIndex(i))
-            }
-        }
-        return result
+        guard let source = dataSource else { return [] }
+        return (0..<source.numberOfCells(self)).map { source.cellForIndex($0) }
     }
 
     // open all cells
     public func open() {
-        
-        // rotate plus icon
-        CATransaction.setAnimationDuration(0.8)
-        self.plusLayer.transform = CATransform3DMakeRotation((CGFloat(M_PI) * rotationDegrees) / 180, 0, 0, 1)
-
-        let cells = cellArray()
-        for cell in cells {
-            insertCell(cell)
+        if let openedImage = openedImage {
+            plusLayer.contents = openedImage.CGImage
+        } else {
+            CATransaction.setAnimationDuration(0.8)
+            self.plusLayer.transform = CATransform3DMakeRotation((CGFloat(M_PI) * rotationDegrees) / 180, 0, 0, 1)
         }
 
+        let cells = cellArray()
+        cells.forEach(insertCell)
+
         self.baseView.open(cells)
+        self.delegate?.liquidFloatingActionButtonOpened?(self)
         
         self.isClosed = false
     }
 
     // close all cells
     public func close() {
-        
-        // rotate plus icon
-        CATransaction.setAnimationDuration(0.8)
-        self.plusLayer.transform = CATransform3DMakeRotation(0, 0, 0, 1)
+        if let image = image {
+            plusLayer.contents = image.CGImage
+        } else {
+            CATransaction.setAnimationDuration(0.8)
+            self.plusLayer.transform = CATransform3DMakeRotation(0, 0, 0, 1)
+        }
     
         self.baseView.close(cellArray())
-        
+        self.delegate?.liquidFloatingActionButtonClosed?(self)
         self.isClosed = true
     }
 
@@ -229,11 +247,7 @@ public class LiquidFloatingActionButton : UIView {
     }
 
     private func didTapped() {
-        if isClosed {
-            open()
-        } else {
-            close()
-        }
+        isClosed ? open() : close()
     }
     
     public func didTappedCell(target: LiquidFloatingCell) {
