@@ -281,8 +281,8 @@ class ActionBarBaseView : UIView {
 
 class CircleLiquidBaseView : ActionBarBaseView {
 
-    let openDuration: CGFloat  = 0.6
-    let closeDuration: CGFloat = 0.2
+    let openDuration: CGFloat  = 0.1
+    let closeDuration: CGFloat = 0.1
     let viscosity: CGFloat     = 0.65
     var animateStyle: LiquidFloatingActionButtonAnimateStyle = .Up
     var color: UIColor = UIColor(red: 82 / 255.0, green: 112 / 255.0, blue: 235 / 255.0, alpha: 1.0) {
@@ -310,8 +310,8 @@ class CircleLiquidBaseView : ActionBarBaseView {
         engine?.viscosity = viscosity
         self.bigEngine = SimpleCircleLiquidEngine(radiusThresh: radius, angleThresh: 0.55)
         bigEngine?.viscosity = viscosity
-        self.engine?.color = actionButton.color
-        self.bigEngine?.color = actionButton.color
+        self.engine?.color = UIColor.clearColor()
+        self.bigEngine?.color = UIColor.clearColor()
 
         baseLiquid = LiquittableCircle(center: self.center.minus(self.frame.origin), radius: radius, color: actionButton.color)
         baseLiquid?.clipsToBounds = false
@@ -396,7 +396,7 @@ class CircleLiquidBaseView : ActionBarBaseView {
     }
     
     func updateOpen() {
-        update(0.1, duration: openDuration) { cell, i, ratio in
+        update(0.03, duration: openDuration) { cell, i, ratio in
             let posRatio = ratio > CGFloat(i) / CGFloat(self.openingCells.count) ? ratio : 0
             let distance = (cell.frame.height * 0.5 + CGFloat(i + 1) * cell.frame.height * 1.5) * posRatio
             cell.center = self.center.plus(self.differencePoint(distance))
