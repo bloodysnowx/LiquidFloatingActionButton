@@ -63,10 +63,10 @@ public class LiquidFloatingActionButton : UIView {
     }
     
     private var imageLayerRect: CGRect {
-        return CGRect(x: circleLayer.bounds.minX + circleLayer.bounds.width * 0.1,
-                      y: circleLayer.bounds.minY + circleLayer.bounds.height * 0.1,
-                      width: circleLayer.bounds.width * 0.8,
-                      height: circleLayer.bounds.width * 0.8)
+        return CGRect(x: circleLayer.bounds.minX + circleLayer.bounds.width * 0.15,
+                      y: circleLayer.bounds.minY + circleLayer.bounds.height * 0.15,
+                      width: circleLayer.bounds.width * 0.7,
+                      height: circleLayer.bounds.width * 0.7)
     }
     
     private func updatePlusLayerFrame() {
