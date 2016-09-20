@@ -41,6 +41,7 @@ public class LiquidFloatingActionButton : UIView {
     }
     public var enableShadow = true {
         didSet {
+			baseView.enableShadow = enableShadow
             setNeedsDisplay()
         }
     }
