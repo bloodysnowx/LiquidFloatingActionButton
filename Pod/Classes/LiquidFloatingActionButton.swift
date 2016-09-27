@@ -249,7 +249,6 @@ public class LiquidFloatingActionButton : UIView {
     private func didTapped() {
         if isClosed { open() }
         else {
-            close()
             delegate?.liquidFloatingActionButton?(self, didSelectItemAtIndex: -1)
         }
     }
